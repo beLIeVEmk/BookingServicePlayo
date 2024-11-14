@@ -71,6 +71,17 @@ export class HelperFunctions{
 
       return timestamp
     }
+    isMoreThan7DaysAway(dateString){
+      const givenDate = new Date(dateString);
+      const today = new Date();
+    
+      // Calculate the date 7 days from today
+      const sevenDaysFromToday = new Date();
+      sevenDaysFromToday.setDate(today.getDate() + 7);
+    
+      // Check if the given date is more than 7 days away
+      return givenDate > sevenDaysFromToday;
+    };
     createErrResBody(error){
         if(error?.code || error?.response?.field){
             const code=error.code

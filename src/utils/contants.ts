@@ -26,6 +26,7 @@ export const CONSTANTS={
     },
     axiosURLs:{
         getFacInfo:(facilityId)=>{return `http://localhost:3001/facility/facilityInfo?id=${facilityId}`},
-        getGroupInfo:(groupId)=>{return `http://localhost:3003/group/getGroupInfo?id=${groupId}`}
+        getGroupInfo:(groupId)=>{return `http://localhost:3003/group/getGroupInfo?id=${groupId}`},
+        getUserInfo:()=>{return `http://localhost:3003/user/getUserInfo`}
     }
 }

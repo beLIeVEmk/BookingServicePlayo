@@ -6,6 +6,7 @@ import { RedisFunction } from "src/common/redisFunctions";
 import { BookingDocument, BookingModel } from "src/schema/booking.schema";
 import { CONSTANTS } from "src/utils/contants";
 import { HelperFunctions } from "src/utils/helperFunctions";
+import { MailService } from "./mail.service";
 
 
 @Injectable()
@@ -13,6 +14,7 @@ export class BookingService{
 
     constructor(@InjectModel(BookingModel) private readonly bookModel:Model<BookingDocument>,
                 private readonly helperFunctions:HelperFunctions,
+                private readonly mailService:MailService
                 ){}
 
     async createBooking(body,uuid:string,jwtToken:string){
@@ -36,6 +38,16 @@ export class BookingService{
             }).catch((error)=>{
                 throw new BadRequestException('Invalid group request');
             })
+            const userInfo=await axios.get(CONSTANTS.axiosURLs.getUserInfo(),{
+                headers:{
+                    Authorization:jwtToken
+                }
+            }).catch((error)=>{
+                throw new BadRequestException('Invalid user request');
+            })
+            if(this.helperFunctions.isMoreThan7DaysAway(body['groupId'])){
+                throw new BadRequestException('Cannot book for date more than a week')
+            }
             const pricePerHead=facilityInfo.data['pricePerHead'];
             const totalMembers=groupInfo.data['groupSize'];
             if(totalMembers>facilityInfo.data['maxGroupSize']){
@@ -49,6 +61,7 @@ export class BookingService{
                 throw new BadRequestException('Invalid time slot request');
             }
             body['bookingAdmin']=uuid;
+            await this.mailService.sendMail(userInfo.data['email'],'Booking Confirmed',`Your booking for booking date ${new Date(body['bookingDate'])} has been confirmed`)
             return await this.bookModel.create(body);
         } catch (error) {
             throw error;
